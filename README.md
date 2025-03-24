@@ -28,17 +28,17 @@ ghost-backup:
   image: ghost-backup-s3:latest
   restart: always
   environment:
-    SCHEDULE: '@daily'           # Run backup daily
-    BACKUP_KEEP_DAYS: 30         # Keep backups for 30 days
-    PASSPHRASE: your-secret-key  # Optional encryption key
-    
+    SCHEDULE: "@daily" # Run backup daily
+    BACKUP_KEEP_DAYS: 30 # Keep backups for 30 days
+    PASSPHRASE: your-secret-key # Optional encryption key
+
     # S3 Configuration
     S3_REGION: us-east-1
     S3_ACCESS_KEY_ID: your-access-key
     S3_SECRET_ACCESS_KEY: your-secret-key
     S3_BUCKET: your-ghost-backups
     S3_PREFIX: ghost/backups
-    
+
     # MySQL Configuration
     MYSQL_HOST: db
     MYSQL_PORT: 3306
@@ -60,6 +60,7 @@ docker-compose up -d
 ## Environment Variables
 
 ### Required Variables
+
 - `MYSQL_HOST`: MySQL host
 - `MYSQL_DATABASE`: MySQL database name
 - `S3_BUCKET`: S3 bucket name
@@ -67,6 +68,7 @@ docker-compose up -d
 - `S3_ACCESS_KEY_ID` and `S3_SECRET_ACCESS_KEY`: S3 credentials
 
 ### Optional Variables
+
 - `MYSQL_PORT`: MySQL port (default: 3306)
 - `MYSQLDUMP_EXTRA_OPTS`: Additional options for mysqldump
 - `GHOST_CONTENT_DIR`: Ghost content directory (default: /ghost_content)
@@ -74,7 +76,7 @@ docker-compose up -d
 - `S3_PREFIX`: Path prefix in the bucket (default: backup)
 - `S3_ENDPOINT`: For non-AWS S3 providers
 - `S3_S3V4`: Use S3v4 signature (yes/no, default: no)
-- `SCHEDULE`: Cron schedule (e.g., @daily, @weekly, or '0 3 * * *')
+- `SCHEDULE`: Cron schedule (e.g., @daily, @weekly, or '0 3 \* \* \*')
 - `PASSPHRASE`: Encryption passphrase
 - `BACKUP_KEEP_DAYS`: Days to keep backups before deletion
 
@@ -142,6 +144,11 @@ environment:
   # ... other settings ...
   MYSQLDUMP_EXTRA_OPTS: "--ignore-table=ghost_prod.sessions --no-tablespaces"
 ```
+
+### Build for Linux
+
+docker build --platform linux/amd64 -t ghost-backup-s3 .
+docker build --platform linux/amd64 -t ringofregen/ghost-s3-backup:0.3 .
 
 ## License
 
