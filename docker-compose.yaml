@@ -1,0 +1,74 @@
+version: "3.1"
+
+services:
+  # Example Ghost and MySQL services for reference
+  ghost:
+    image: ghost:5-alpine
+    restart: always
+    ports:
+      - 8080:2368
+    environment:
+      # Production URL
+      url: http://localhost:8080
+      
+      # Database configuration
+      database__client: mysql
+      database__connection__host: db
+      database__connection__user: ghost_user
+      database__connection__password: ghost_password
+      database__connection__database: ghost_prod
+      
+      # Production settings
+      NODE_ENV: production
+      
+    volumes:
+      - ghost_content:/var/lib/ghost/content
+    depends_on:
+      - db
+
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: ghost_prod
+      MYSQL_USER: ghost_user
+      MYSQL_PASSWORD: ghost_password
+    volumes:
+      - ghost_db:/var/lib/mysql
+    command: --default-authentication-plugin=mysql_native_password
+
+  # Backup service for Ghost
+  ghost-backup:
+    build:
+      context: .
+    restart: always
+    environment:
+      SCHEDULE: '@daily'           # Run backup daily
+      BACKUP_KEEP_DAYS: 30         # Keep backups for 30 days
+      PASSPHRASE: your-secret-key  # Optional encryption key
+      
+      # S3 Configuration
+      S3_REGION: us-east-1
+      S3_ACCESS_KEY_ID: your-access-key
+      S3_SECRET_ACCESS_KEY: your-secret-key
+      S3_BUCKET: your-ghost-backups
+      S3_PREFIX: ghost/backups
+      
+      # MySQL Configuration
+      MYSQL_HOST: db
+      MYSQL_PORT: 3306
+      MYSQL_DATABASE: ghost_prod
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQLDUMP_EXTRA_OPTS: "--no-tablespaces --column-statistics=0"
+    volumes:
+      - ghost_content:/ghost_content:ro
+    depends_on:
+      - db
+      - ghost
+
+volumes:
+  ghost_content:
+    driver: local
+  ghost_db:
+    driver: local
